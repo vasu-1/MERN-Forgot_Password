@@ -1,7 +1,15 @@
 .App {
   text-align: center;
 }
-
+.frontpageimg{
+  width: auto;
+  height: 65vh;
+  margin: 0 auto;
+}
+.contentimg{
+  display: flex;
+  justify-content: center;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

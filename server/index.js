@@ -3,7 +3,7 @@ const connectDB = require('./db');
 var cors = require('cors');
 const bodyParser = require('body-parser')
 
-var whitelist = ['https://localhost:8082/', 'http://example.com/']
+var whitelist = ['https://localhost:8082/', 'http://localhost.3000/']
 var corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
@@ -30,7 +30,7 @@ app.use(express.json({ extended: false }));
 app.use(express.json());
 
 // link the router
-// app.use(require('./router/auth'));
+// app.use(require('./controller/login'));
 // // app.use(require('./router/userauth.js'));
 // app.use(require('./router/answer/AnswerCrud.js'));
 // app.use(require('./router/question/QuestionCrud.js'));
