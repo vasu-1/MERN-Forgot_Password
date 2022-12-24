@@ -6,7 +6,7 @@ const apikey = process.env.API_KEY;
 const sgMail = require("@sendgrid/mail");
 
 // async..await is not allowed in global scope, must use a wrapper
-async function sendmailer(email, maincontent, postscript, code) {
+async function sendmailer(email, maincontent, postscript, code, subject) {
   sgMail.setApiKey(apikey);
   const msg = {
     from: "admin@askoverflow.co",
@@ -15,7 +15,7 @@ async function sendmailer(email, maincontent, postscript, code) {
       {
         to: { email },
         dynamic_template_data: {
-          email,maincontent,postscript,code
+          email,maincontent,postscript,code,subject
         },
       },
     ],

@@ -14,8 +14,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   token: {
-    type: String,
-    required: true,
+    type: String
   },
   pin: {
     type: String,
@@ -43,19 +42,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hashSync(this.password, salt);
   next();
 });
-
-// We are generatig token
-
-generateAuthToken = async function () {
-  try {
-    let newtoken = jwt.sign({ _id: this._id }, secret_key);
-    this.token = newtoken;
-    await this.save();
-    return newtoken;
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 const User = mongoose.model("User", userSchema);
 
