@@ -1,29 +1,29 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config()
-const secret_key = process.env.SECRETKEYJWT
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const secret_key = process.env.SECRETKEYJWT;
 
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true
+    required: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
-  token:{
+  token: {
     type: String,
-    required: true
+    required: true,
   },
-  pin:{
-    type: String
+  pin: {
+    type: String,
   },
-  verify:{
-    type:Boolean,
-    default:false
-  }
+  verify: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // userSchema.pre('save', async function(next) {
@@ -35,18 +35,18 @@ const userSchema = new mongoose.Schema({
 //   next();
 // });
 
-userSchema.pre("save", async function(next) {
+userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    return next()
+    return next();
   }
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hashSync(this.password, salt);
   next();
-})
+});
 
 // We are generatig token
 
-generateAuthToken = async function() {
+generateAuthToken = async function () {
   try {
     let newtoken = jwt.sign({ _id: this._id }, secret_key);
     this.token = newtoken;
@@ -55,8 +55,8 @@ generateAuthToken = async function() {
   } catch (err) {
     console.log(err);
   }
-}
+};
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
