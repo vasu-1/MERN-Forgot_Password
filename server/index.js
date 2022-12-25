@@ -3,9 +3,10 @@ const connectDB = require("./db");
 var cors = require("cors");
 const bodyParser = require("body-parser");
 
-var whitelist = ["https://localhost:8082/", "http://localhost.3000/"];
+var whitelist = ["https://localhost:3000/", "http://localhost:3000" , "http://localhost:3000/"];
 var corsOptions = {
   origin: function (origin, callback) {
+    console.log("Request comed");
     if (!origin || whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {

@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
   pin: {
     type: String,
   },
+  photo:{
+    type:String,
+  },
   verify: {
     type: Boolean,
     default: false,

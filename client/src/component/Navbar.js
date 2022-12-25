@@ -1,8 +1,13 @@
-import React from 'react';
+import React, {useState} from 'react';
 // import ReactDOM from 'react-dom/client';
 
 const NavScreen = (props) => {
-    var profileImg = "Login Please";
+    const [usrloggedIn,setusrloggedIn] = useState(localStorage.getItem("Verified") ? localStorage.getItem("Verified") : "");
+    function logout(){
+        localStorage.clear();
+        setusrloggedIn("");
+    }
+
     return(
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary m-2 rounded">
             <div class="container-fluid">
@@ -24,7 +29,10 @@ const NavScreen = (props) => {
                 </ul>
                 <div className='d-flex'>
                     <div>
-                        {profileImg}
+                        {usrloggedIn ? usrloggedIn : "Not LoggedIn"}
+                    </div>
+                    <div>
+                        <button className="btn btn-outline-danger" onClick={logout}>Logout</button>
                     </div>
                 </div>
                 </div>

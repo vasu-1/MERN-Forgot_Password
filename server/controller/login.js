@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 // const connectDB = require('../db');
+const fs = require("fs");
 require("dotenv").config();
 const User = require("./model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mailsender = require("./mailer");
 const secret_key = process.env.SECRETKEYJWT;
+const formidable = require("formidable");
 var crypto = require("crypto");
 
 generateAuthToken = function (str) {
@@ -22,43 +24,81 @@ router.get("/api/v1", (req, res) => {
   res.send("Welcome to API Version 1");
 });
 
+//Middleware
+const photo = (req, res, next) => {
+  if (req.product.photo.data) {
+    res.set("Content-Type", req.product.photo.contentType);
+    return res.send(req.product.photo.data);
+  }
+  next();
+};
+
 // Signup
 router.post("/api/v1/signup", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(422).json({ error: "Please fill all the properties" });
-  }
-
+  let form = new formidable.IncomingForm({ multiples: true });
+  // form.keepExtensions = true;
   try {
-    const emailExist = await User.findOne({ email: email });
+    // console.log()
+    form.parse(req, async (err, fields, file) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Problem with image",
+        });
+      }
+      const { email, password } = fields;
+      if (!email || !password) {
+        return res
+          .status(422)
+          .json({ error: "Please fill all the properties" });
+      }
+      try {
+        const emailExist = await User.findOne({ email: email });
+        if (emailExist) {
+          return res.status(422).json({ error: "Email is already exist" });
+        }
+        const pin = Math.random().toString(36).substring(2, 7);
+        var token = generateAuthToken(email);
+        const user = new User({ email, password, token, pin });
+        if (file.photo) {
+          if (file.photo.size > 3000000) {
+            return res.status(400).json({
+              error: "File size too big",
+            });
+          }
+          let filepath = file.photo.filepath;
+          let newpath =
+            "C:/Users/VASU/Documents/github/MERN-Forgot_Password/server/img/";
+          var filename = file.photo.newFilename + file.photo.originalFilename;
+          newpath += filename;
+          fs.rename(filepath, newpath, function () {});
+          user.photo = newpath;
+        }
 
-    if (emailExist) {
-      return res.status(422).json({ error: "Email is already exist" });
-    }
-    const pin = Math.random().toString(36).substring(2, 7);
-    var token = generateAuthToken(email);
-    const user = new User({ email, password, token, pin });
-
-    const userRegister = await user.save();
-
-    const code = pin;
-    if (userRegister) {
-      mailsender.sendmailer(
-        email,
-        "Please Verify Your Email",
-        "Use Below Code To Verify Your Email",
-        code,
-        "Email Verification"
-      );
-      return res
-        .status(201)
-        .json({ message: "Pin Sent Successfully, Kindly Check Your Email!" });
-    } else {
-      res.status(500).json({ error: "Failed to register user" });
-    }
+        user.save((err, userRegister) => {
+          if (err) {
+            return res.status(500).json({
+              error: "Failed to register user",
+            });
+          }
+          const code = pin;
+          mailsender.sendmailer(
+            email,
+            "Please Verify Your Email",
+            "Use Below Code To Verify Your Email",
+            code,
+            "Email Verification"
+          );
+          return res.status(201).json({
+            message: "Pin Sent Successfully, Kindly Check Your Email!",
+          });
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ error: "Server Error" });
   }
 });
 
@@ -77,7 +117,10 @@ router.post("/api/v1/verify", async (req, res) => {
     }
     if (emailExist) {
       if (pin == emailExist.pin) {
-        const emailExist = await User.updateOne({ email: email }, {verify:true});
+        const emailExist = await User.updateOne(
+          { email: email },
+          { verify: true }
+        );
         mailsender.sendmailer(
           email,
           "You did it! & Verified",
@@ -89,7 +132,7 @@ router.post("/api/v1/verify", async (req, res) => {
           message: "You are verified Successfully!",
           jwttokenloginuser: emailExist.token,
         });
-      }else{
+      } else {
         return res.status(422).json({ error: "Incorrect pin entered!" });
       }
     } else {
@@ -114,10 +157,14 @@ router.post("/api/v1/forgot_password", async (req, res) => {
       return res.status(422).json({ error: "You are not registered!" });
     }
     if (emailExist) {
-      if(emailExist.verify){
-        var id = crypto.randomBytes(35).toString('hex');
-        var code = "http://localhost:3000/reset_paddword?id="+id+"&token="+emailExist.token;
-        await User.updateOne({ email: email }, {pin:id});
+      if (emailExist.verify) {
+        var id = crypto.randomBytes(35).toString("hex");
+        var code =
+          "http://localhost:3000/reset_paddword?id=" +
+          id +
+          "&token=" +
+          emailExist.token;
+        await User.updateOne({ email: email }, { pin: id });
         mailsender.sendmailer(
           email,
           "Reset Password Requested",
@@ -128,8 +175,10 @@ router.post("/api/v1/forgot_password", async (req, res) => {
         return res.status(201).json({
           message: "Check your mail for reset password link!",
         });
-      }else{
-        return res.status(422).json({ error: "You are not verified, so you can't reset the password!" });
+      } else {
+        return res.status(422).json({
+          error: "You are not verified, so you can't reset the password!",
+        });
       }
     } else {
       res.status(500).json({ error: "Something went wrong!" });
@@ -153,16 +202,18 @@ router.post("/api/v1/reset_password_access", async (req, res) => {
       return res.status(422).json({ error: "You are not registered!" });
     }
     if (tokenExist) {
-      if(tokenExist.verify){
-        if(tokenExist.pin == pin){
+      if (tokenExist.verify) {
+        if (tokenExist.pin == pin) {
           return res.status(201).json({
             message: "fine!",
           });
-        }else{
+        } else {
           res.status(422).json({ error: "Something went wrong!" });
         }
-      }else{
-        return res.status(422).json({ error: "You are not verified, so you can't reset the password!" });
+      } else {
+        return res.status(422).json({
+          error: "You are not verified, so you can't reset the password!",
+        });
       }
     } else {
       res.status(500).json({ error: "Something went wrong!" });
@@ -186,19 +237,21 @@ router.post("/api/v1/reset_password", async (req, res) => {
       return res.status(422).json({ error: "You are not registered!" });
     }
     if (tokenExist) {
-      if(tokenExist.verify){
-        if(tokenExist.pin == pin){
+      if (tokenExist.verify) {
+        if (tokenExist.pin == pin) {
           const salt = await bcrypt.genSalt();
           cryptPassword = await bcrypt.hashSync(newPassword, salt);
-          await User.updateOne({ token: token }, {password:cryptPassword});
+          await User.updateOne({ token: token }, { password: cryptPassword });
           return res.status(201).json({
             message: "Password Resetted Successfully!",
           });
-        }else{
+        } else {
           res.status(422).json({ error: "Something went wrong!" });
         }
-      }else{
-        return res.status(422).json({ error: "You are not verified, so you can't reset the password!" });
+      } else {
+        return res.status(422).json({
+          error: "You are not verified, so you can't reset the password!",
+        });
       }
     } else {
       res.status(500).json({ error: "Something went wrong!" });
