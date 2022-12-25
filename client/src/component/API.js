@@ -31,3 +31,19 @@ export const PinSubmit = async (email, pin) => {
     });
   return response;
 };
+
+export const Signin = async (email, password) => {
+    var response;
+    await axios
+      .post("http://localhost:8082/api/v1/signin", {
+        email,
+        password,
+      })
+      .then((res) => {
+        response = res;
+      })
+      .catch((err) => {
+        response = err.response;
+      });
+    return response;
+  };

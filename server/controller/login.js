@@ -275,6 +275,10 @@ router.post("/api/v1/signin", async (req, res) => {
     var usernameExist = await User.findOne({
       email,
     });
+    if(!usernameExist){
+      console.log("Not Registered");
+      return res.status(422).json({ error: "You are not registered!!" });
+    }
     if (!usernameExist.verify) {
       return res.status(422).json({ error: "You are not verified!!" });
     }
