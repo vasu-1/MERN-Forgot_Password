@@ -47,3 +47,48 @@ export const Signin = async (email, password) => {
       });
     return response;
   };
+
+export const ForgotPassWord = async (email) => {
+    var response;
+    await axios
+      .post("http://localhost:8082/api/v1/forgot_password", {
+        email,
+      })
+      .then((res) => {
+        response = res;
+      })
+      .catch((err) => {
+        response = err.response;
+      });
+    return response;
+  };
+
+  export const AccessResetPage = async (token,pin) => {
+    var response;
+    await axios
+      .post("http://localhost:8082/api/v1/reset_password_access", {
+        token,pin
+      })
+      .then((res) => {
+        response = res;
+      })
+      .catch((err) => {
+        response = err.response;
+      });
+    return response;
+  };
+
+  export const ResetPassword = async (token,pin,newPassword) => {
+    var response;
+    await axios
+      .post("http://localhost:8082/api/v1/reset_password", {
+        token,pin,newPassword
+      })
+      .then((res) => {
+        response = res;
+      })
+      .catch((err) => {
+        response = err.response;
+      });
+    return response;
+  };

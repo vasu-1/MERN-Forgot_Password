@@ -33,7 +33,7 @@ const photo = (req, res, next) => {
   next();
 };
 
-// Signup
+// Signup -> Done
 router.post("/api/v1/signup", async (req, res) => {
   let form = new formidable.IncomingForm({ multiples: true });
   // form.keepExtensions = true;
@@ -102,6 +102,7 @@ router.post("/api/v1/signup", async (req, res) => {
   }
 });
 
+// Done
 router.post("/api/v1/verify", async (req, res) => {
   const { email, pin } = req.body;
 
@@ -160,7 +161,7 @@ router.post("/api/v1/forgot_password", async (req, res) => {
       if (emailExist.verify) {
         var id = crypto.randomBytes(35).toString("hex");
         var code =
-          "http://localhost:3000/reset_paddword?id=" +
+          "http://localhost:3000/ResetScreen?id=" +
           id +
           "&token=" +
           emailExist.token;
@@ -242,6 +243,7 @@ router.post("/api/v1/reset_password", async (req, res) => {
           const salt = await bcrypt.genSalt();
           cryptPassword = await bcrypt.hashSync(newPassword, salt);
           await User.updateOne({ token: token }, { password: cryptPassword });
+          await User.updateOne({ token: token }, { pin: cryptPassword });
           return res.status(201).json({
             message: "Password Resetted Successfully!",
           });
@@ -261,7 +263,7 @@ router.post("/api/v1/reset_password", async (req, res) => {
   }
 });
 
-// Login
+// Login -> Done
 router.post("/api/v1/signin", async (req, res) => {
   const { email, password } = req.body;
 
