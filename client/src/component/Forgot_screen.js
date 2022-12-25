@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { ForgotPassWord } from "./API";
-import imgScreen from './lock_creen.jpg' 
+import { ForgotPassWord } from "./api/API";
+import imgScreen from './img/lock_creen.jpg' 
 import './style.css'
 
 const ForgotScreen = (props) => {

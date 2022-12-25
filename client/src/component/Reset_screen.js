@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import imgScreen from './lock_screen_pc.jpg'
+import imgScreen from './img/lock_screen_pc.jpg'
 import { useNavigate, useSearchParams } from "react-router-dom";
 import './style.css'
-import { AccessResetPage, ResetPassword } from "./API";
+import { AccessResetPage, ResetPassword } from "./api/API";
 
 const ResetScreen = (props) => {
     const navigate = useNavigate();
@@ -41,15 +41,20 @@ const ResetScreen = (props) => {
 
       const resetSubmit = event => {
         event.preventDefault();
-        setloader("Password Resetting..");
-        ResetPassword(token,id,password).then((res) => {
-            if (res.status !== 201) {
-            setloader(res.data.error);
-            } else {
-            setloader("Password Reset Successfully!");
-            }
-        })
-        .catch((err) => console.log(err));
+        if(password === password1)
+        {
+            setloader("Password Resetting..");
+            ResetPassword(token,id,password).then((res) => {
+                if (res.status !== 201) {
+                setloader(res.data.error);
+                } else {
+                setloader("Password Reset Successfully!");
+                }
+            })
+            .catch((err) => console.log(err));
+        }else{
+            setloader("Both Password And Confirm Password Are Not Same..");
+        }
 
     }
 

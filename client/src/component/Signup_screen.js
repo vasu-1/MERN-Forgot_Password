@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Signup, PinSubmit } from "./API";
+import { Signup, PinSubmit } from "./api/API";
 import "./style.css";
 import $ from "jquery";
 

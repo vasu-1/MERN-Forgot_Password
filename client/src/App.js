@@ -3,7 +3,7 @@ import LoginScreen from "./component/login_screen";
 import NavScreen from "./component/Navbar";
 import ForgotScreen from "./component/Forgot_screen";
 import ResetScreen from "./component/Reset_screen";
-import mainpage from "./component/mainpage.jpg";
+import mainpage from "./component/img/mainpage.jpg";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignupScreen from "./component/Signup_screen";
 
